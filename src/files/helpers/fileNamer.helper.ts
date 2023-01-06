@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common/exceptions';
-
+import { v4 as uuid} from 'uuid';
 
 
 export const fileNamer = (res: Express.Request, file: Express.Multer.File, callback: Function) => {
@@ -10,7 +10,7 @@ export const fileNamer = (res: Express.Request, file: Express.Multer.File, callb
 
    const fileExtension = file.mimetype.split('/')[1];
 
-   const fileName = `HolaMundo.${ fileExtension }`;
+   const fileName = `${uuid()}.${ fileExtension }`;
     
     callback(null,fileName);
 }
