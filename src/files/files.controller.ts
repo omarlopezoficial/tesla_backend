@@ -55,6 +55,7 @@ export class FilesController {
     return {
       secureUrl
     };
+
  }
 
 }
