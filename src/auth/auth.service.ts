@@ -6,6 +6,8 @@ import { User } from './entities/user.entity';
 
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto';
+import { JwtPayLoad } from './interfaces/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
@@ -13,7 +15,9 @@ export class AuthService {
 
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+
+    private readonly jwtService: JwtService, 
   ){}
 
 
@@ -29,8 +33,11 @@ export class AuthService {
 
       delete user.password;
 
-      return user;
-      // Retornar Jwtoken 
+      return {
+        ...user,
+        token: this.getJwtToken({id:user.id}),
+      };
+      
     }
     catch(error){
       this.handleDBErrors(error);
@@ -44,7 +51,7 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({
       where: {email},
-      select: {email: true, password: true}
+      select: {email: true, password: true, id:true}
     });
 
     if(!user)
@@ -53,9 +60,27 @@ export class AuthService {
     if( !bcrypt.compareSync(password,user.password))
       throw new UnauthorizedException('Not valid Credentials (Password)');
 
-    return user;
-    //TODO: Retornar JWT 
+    
+    return {
+      email: user.email, 
+      password: user.password,
+      token: this.getJwtToken({id:user.id}),
+    };
+    
 
+  }
+
+  async checkAuthStatus( user:User){
+    return {
+      ...user,
+      token: this.getJwtToken({id:user.id}),
+    };
+  }
+
+
+  private getJwtToken(payload: JwtPayLoad){
+      const token = this.jwtService.sign(payload);
+      return token;
   }
 
   private handleDBErrors(error:any):never{

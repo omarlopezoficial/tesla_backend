@@ -1,5 +1,5 @@
 
 export interface JwtPayLoad{
-    email: string;
+    id: string;
     // Todo: Añadir todo lo que quieran grabar
 }
